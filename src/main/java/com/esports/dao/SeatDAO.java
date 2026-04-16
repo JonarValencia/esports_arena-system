@@ -2,7 +2,6 @@ package com.esports.dao;
 
 import com.esports.model.Seat;
 import com.esports.util.DatabaseConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
