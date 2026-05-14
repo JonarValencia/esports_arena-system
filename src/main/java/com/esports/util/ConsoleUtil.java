@@ -11,13 +11,14 @@ public class ConsoleUtil {
     public static final String RED    = "\u001B[31m";
     public static final String YELLOW = "\u001B[33m";
     public static final String BLUE   = "\u001B[34m";
+    public static final String PURPLE = "\u001B[35m";
 
     private static final Scanner scanner = new Scanner(System.in);
 
     private ConsoleUtil() {}
 
     public static void printHeader(String title) {
-        String border = "=".repeat(50);
+        String border = "=".repeat(52);
         System.out.println(CYAN + BOLD + border);
         System.out.printf("  %s%n", title.toUpperCase());
         System.out.println(border + RESET);
@@ -36,7 +37,7 @@ public class ConsoleUtil {
     }
 
     public static void printDivider() {
-        System.out.println("-".repeat(50));
+        System.out.println("-".repeat(52));
     }
 
     public static String prompt(String label) {
@@ -51,6 +52,20 @@ public class ConsoleUtil {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 printError("Please enter a valid number.");
+            }
+        }
+    }
+
+    // ── NEW: prompt for decimal/currency input ────────────────────────────
+    public static double promptDouble(String label) {
+        while (true) {
+            String input = prompt(label);
+            try {
+                double val = Double.parseDouble(input);
+                if (val < 0) { printError("Amount cannot be negative."); continue; }
+                return val;
+            } catch (NumberFormatException e) {
+                printError("Please enter a valid amount (e.g. 500 or 1500.50).");
             }
         }
     }

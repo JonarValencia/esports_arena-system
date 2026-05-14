@@ -23,9 +23,10 @@ public class DatabaseConnection {
     public static void initializeDatabase() throws SQLException {
         Connection conn = getConnection();
         try (Statement stmt = conn.createStatement()) {
+
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS admins (
-                    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id       INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL
                 )
@@ -43,10 +44,10 @@ public class DatabaseConnection {
 
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS seats (
-                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event_id     INTEGER NOT NULL,
-                    seat_number  TEXT NOT NULL,
-                    is_reserved  INTEGER NOT NULL DEFAULT 0,
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id    INTEGER NOT NULL,
+                    seat_number TEXT NOT NULL,
+                    is_reserved INTEGER NOT NULL DEFAULT 0,
                     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
                     UNIQUE (event_id, seat_number)
                 )
@@ -54,18 +55,38 @@ public class DatabaseConnection {
 
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS reservations (
-                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                    seat_id      INTEGER NOT NULL UNIQUE,
-                    event_id     INTEGER NOT NULL,
-                    user_name    TEXT NOT NULL,
-                    user_email   TEXT NOT NULL,
-                    reserved_at  TEXT NOT NULL DEFAULT (datetime('now')),
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    seat_id     INTEGER NOT NULL UNIQUE,
+                    event_id    INTEGER NOT NULL,
+                    user_name   TEXT NOT NULL,
+                    user_email  TEXT NOT NULL,
+                    reserved_at TEXT NOT NULL DEFAULT (datetime('now')),
                     FOREIGN KEY (seat_id)  REFERENCES seats(id)  ON DELETE CASCADE,
                     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
                 )
             """);
 
-            // Seed default admin if not present
+            // ── NEW: Transactions table ──────────────────────────────────────
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                    reservation_id INTEGER NOT NULL,
+                    transaction_id TEXT NOT NULL UNIQUE,
+                    user_name      TEXT NOT NULL,
+                    user_email     TEXT NOT NULL,
+                    seat_number    TEXT NOT NULL,
+                    event_name     TEXT NOT NULL,
+                    payment_method TEXT NOT NULL,
+                    amount         REAL NOT NULL,
+                    discount       REAL NOT NULL DEFAULT 0,
+                    vat_amount     REAL NOT NULL,
+                    final_amount   REAL NOT NULL,
+                    status         TEXT NOT NULL,
+                    created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+                    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE
+                )
+            """);
+
             stmt.executeUpdate("""
                 INSERT OR IGNORE INTO admins (username, password)
                 VALUES ('admin', 'admin123')
